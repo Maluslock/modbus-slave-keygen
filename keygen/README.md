@@ -89,7 +89,7 @@ RESULT: PASS (2196 assertions, 200/200 random roundtrips)
 - **参数校验**：name 太短 / 含 Tab / 含换行 / 非 ASCII / 含 `WIT`、wit 越界 / 字符串 / 浮点 / bool，均抛异常。
 - **keygen.vbs 等价性**：ASCII-only、CRLF、`If/End If`/`For/Next`/`Function` 块结构静态检查；按 VBS 语句逐行模拟（`AscW`/`Xor`/`Hex`/`Right`），45 组（5 组候选 + 40 组随机）输出与 Python 版完全一致。
 
-说明：本机是 Linux，**没有执行过 `keygen.vbs`**（无 cscript/wine）。VBS 版是 Python 版的逐行等价翻译（同一常量、同一循环、`Hex()` 大写、同样的参数校验）；`selfcheck.py` 对 VBS 源码做了 ASCII-only / CRLF / 块结构静态检查与逐语句语义模拟（45/45 与 Python 一致）。VBScript 引擎上的真实行为待 t3 在 192.168.101.70 上用 `cscript //nologo keygen.vbs` 实测。
+说明：本机是 Linux，**没有执行过 `keygen.vbs`**（无 cscript/wine）。VBS 版是 Python 版的逐行等价翻译（同一常量、同一循环、`Hex()` 大写、同样的参数校验）；`selfcheck.py` 对 VBS 源码做了 ASCII-only / CRLF / 块结构静态检查与逐语句语义模拟（45/45 与 Python 一致）。VBScript 引擎上的真实行为待 t3 在 一台 Windows 10 x64 测试机 上用 `cscript //nologo keygen.vbs` 实测。
 
 ## keys.json 候选
 

@@ -1,6 +1,6 @@
 # Modbus Slave 9.3.0.2120 (x64) 注册码落地验证报告
 
-- 目标机：192.168.101.70（PSI-LIUy，用户 PSI\liuyue，交互会话 session 1）
+- 目标机：一台 Windows 10 x64 测试机（Windows 10 x64，交互会话 session 1）
 - 程序：C:\Program Files\Modbus Tools\Modbus Slave\mbslave.exe（9.3.0.2120 x64，2631136 字节）
 - 验证时间：2026-11-11 15:34 – 16:05 (+08:00)
 - 执行任务：t3（AgentTeams team mbslave-crack）
@@ -62,7 +62,7 @@ App 显示的是解密串去掉前 7 字符 `mbslave` 后的剩余部分，故�
 | 2 | 15:52:42.526 | 44460 | `TESTSLAVE-2026\n# WIT99` |
 | 3 | 15:52:51.680 | 49564 | `TESTSLAVE-2026\n# WIT99` |
 
-日志：`C:\Users\liuyue\diag-agent\cold-cold1.txt`（本地副本 `reports/evidence/cold-cold1.txt`）。
+日志：`C:\verify-work\cold-cold1.txt`（本地副本 `reports/evidence/cold-cold1.txt`）。
 
 ### 2.4 ab1 与 ok1 的矛盾解释（不是随机性）
 两次之间**只有注册表 Key 变了**，没有改 HKLM、没有 probe 删写、也没有读到旧进程/旧句柄：
@@ -123,20 +123,20 @@ HKLM 从未写过任何 mbslave 注册项，授权完全来自 HKCU 的 `Registe
 
 | 文件 | 用途 |
 |---|---|
-| `C:\Users\liuyue\diag-agent\backup-mbslave.reg` | 改动前原始态（6732 字节，`HKCU\SOFTWARE\Witte Software` 全量，**不含 Register 子键**）。回滚基线 |
-| `C:\Users\liuyue\diag-agent\reg-after-key1.reg` | 写入错误 Key 后的状态（3478 字节），用于 2.4 对比 |
-| `C:\Users\liuyue\diag-agent\reg-licensed.reg` | 修正 Key 生效后的状态（400 字节） |
-| `C:\Users\liuyue\diag-agent\final-licensed.reg` | 最终态导出，**可直接复用**：`reg import final-licensed.reg` |
+| `C:\verify-work\backup-mbslave.reg` | 改动前原始态（6732 字节，`HKCU\SOFTWARE\Witte Software` 全量，**不含 Register 子键**）。回滚基线 |
+| `C:\verify-work\reg-after-key1.reg` | 写入错误 Key 后的状态（3478 字节），用于 2.4 对比 |
+| `C:\verify-work\reg-licensed.reg` | 修正 Key 生效后的状态（400 字节） |
+| `C:\verify-work\final-licensed.reg` | 最终态导出，**可直接复用**：`reg import final-licensed.reg` |
 
 **回滚到未注册态**：
 ```powershell
 reg delete "HKCU\SOFTWARE\Witte Software\mbslave\Register" /f
 # 或整体恢复：
-reg import C:\Users\liuyue\diag-agent\backup-mbslave.reg
+reg import C:\verify-work\backup-mbslave.reg
 ```
 **恢复授权**：
 ```powershell
-reg import C:\Users\liuyue\diag-agent\final-licensed.reg
+reg import C:\verify-work\final-licensed.reg
 ```
 
 ---
@@ -156,7 +156,7 @@ reg import C:\Users\liuyue\diag-agent\final-licensed.reg
 | final-licensed.reg | 最终态导出（可直接 reg import 复用） | 16:03 |
 | fixed_keys.json | 用正确密钥串 29728013 重新生成的 5 组码 | 15:51 |
 
-远程证据目录：`C:\Users\liuyue\diag-agent\`（备份、导出、日志、截图、probe 脚本）。
+远程证据目录：`C:\verify-work\`（备份、导出、日志、截图、probe 脚本）。
 
 ---
 

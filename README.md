@@ -2,7 +2,7 @@
 
 [![version](https://img.shields.io/badge/Modbus%20Slave-9.3.0.2120%20(x64)-2f6f4f)](docs/registration_logic.md)
 [![platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-1f6feb)](#)
-[![status](https://img.shields.io/badge/verified-on%20192.168.101.70-16a34a)](#-实机验证)
+[![status](https://img.shields.io/badge/verified-on%20Windows%2010%20x64-16a34a)](#-实机验证)
 
 针对 **Witte Software Modbus Slave 9.3.0.2120 (x64)** 的注册码逆向与生成工具。
 算法由静态反汇编还原，生成器在真机上验证通过：About 显示授权名、Connect 可用、30 天到期提示与 10 分钟断连限制全部解除。

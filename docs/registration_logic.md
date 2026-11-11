@@ -5,7 +5,7 @@
 - 目标：`/home/user/破解/mbslave.exe`（PE32+ x86-64，2631136 字节，FileVersion 9.3.0.2120，PDB `C:\Users\Brian Witte\Documents\vc\slavetrunk\x64\release\mbslave.pdb`）
 - 基址 **0x140000000**；下文地址除特别说明均为 **VA**。RVA→文件偏移：`.text` RVA 0x1000 ↔ raw 0x400。
 - 工具：objdump + capstone 5.0.9 + pefile（装于 `/home/user/破解/.pylibs`，脚本 `an.py` / `scan2.py` / `xref.py`），全库 9090 个函数 / 450884 条指令的交叉引用索引（`insns.pkl`）。
-- 说明：本机为 Linux，无法执行 PE，**运行时验证需在 192.168.101.70 落地**。全部结论来自指令级静态证据 + 与公开 8.x/9.5 算法的逐条比对。
+- 说明：本机为 Linux，无法执行 PE，**运行时验证需在 一台 Windows 10 x64 测试机 落地**。全部结论来自指令级静态证据 + 与公开 8.x/9.5 算法的逐条比对。
 
 ---
 
@@ -249,7 +249,7 @@ key       = ct.hex().upper() + "%02X" % xor_all(plaintext)
 - 不要把 WIT 后两位写成 14..22（会被判旧码）。
 - 名字支持 UTF-8（中文名可行）；名字里不要含 `\nWIT` / `\n# WIT`。
 - HKLM 那份 Key 也会被读（第二机会），如果测试机 HKLM 里残留旧码可能导致"看起来注册成功但显示旧版本"，排查时先看 HKCU。
-- 静态分析未做运行时验证；`192.168.101.70` 上需实测：输入码 → 是否出现 `Error in registration key`、重启后是否 licensed。
+- 静态分析未做运行时验证；`一台 Windows 10 x64 测试机` 上需实测：输入码 → 是否出现 `Error in registration key`、重启后是否 licensed。
 
 ---
 
