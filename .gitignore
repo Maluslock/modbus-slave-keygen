@@ -3,3 +3,4 @@ __pycache__/
 *.exe
 .agent-teams/
 node_modules/
+dist/
