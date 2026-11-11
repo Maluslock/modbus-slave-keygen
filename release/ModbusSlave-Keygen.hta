@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Modbus Slave 9.x 注册机</title>
+<HTA:APPLICATION
+  APPLICATIONNAME="ModbusSlaveKeygen"
+  ID="oHTA"
+  SCROLL="no"
+  SINGLEINSTANCE="yes"
+  CAPTION="yes"
+  BORDER="thin"
+  INNERBORDER="no"
+  SYSMENU="yes"
+  MAXIMIZEBUTTON="no"
+  MINIMIZEBUTTON="yes"
+  SHOWINTASKBAR="yes"
+/>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 18px 20px 14px 20px;
+    font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+    font-size: 13px; color: #1f2328; background: #f5f6f8;
+    user-select: none;
+  }
+  h1 { font-size: 15px; margin: 0 0 4px 0; font-weight: 600; }
+  .sub { color: #6b7280; font-size: 12px; margin-bottom: 14px; }
+  .card { background: #fff; border: 1px solid #e3e6ea; border-radius: 8px; padding: 14px 16px; }
+  .row { display: flex; align-items: center; margin-bottom: 10px; }
+  .row label { width: 96px; color: #374151; flex: none; }
+  input[type=text], input[type=number] {
+    flex: 1; height: 30px; padding: 0 8px; border: 1px solid #cfd4da; border-radius: 5px;
+    font-family: Consolas, monospace; font-size: 13px; background: #fff; color: #111;
+    user-select: text;
+  }
+  input[type=number] { max-width: 110px; }
+  .hint { color: #8a919b; font-size: 11px; margin-left: 10px; }
+  .btns { margin: 12px 0 4px 0; }
+  button {
+    height: 30px; padding: 0 14px; margin-right: 8px; border-radius: 5px; cursor: pointer;
+    border: 1px solid #cfd4da; background: #fff; font-size: 13px; color: #1f2328;
+  }
+  button:hover { background: #f0f2f5; }
+  button.primary { background: #2563eb; border-color: #2563eb; color: #fff; }
+  button.primary:hover { background: #1d4ed8; }
+  button.ok { background: #16a34a; border-color: #16a34a; color: #fff; }
+  button.ok:hover { background: #15803d; }
+  textarea {
+    width: 100%; height: 78px; margin-top: 6px; padding: 8px; resize: none;
+    border: 1px solid #cfd4da; border-radius: 5px; background: #fbfcfd;
+    font-family: Consolas, monospace; font-size: 13px; color: #111; user-select: text;
+  }
+  .meta { font-family: Consolas, monospace; font-size: 11px; color: #6b7280; margin-top: 6px; white-space: pre-wrap; user-select: text; }
+  #status { margin-top: 10px; font-size: 12px; min-height: 18px; color: #374151; }
+  .ok-t { color: #15803d; } .err-t { color: #b91c1c; }
+</style>
+</head>
+<body>
+<h1>Modbus Slave 9.x 注册机</h1>
+<div class="sub">适用于 Modbus Slave 9.3.0.2120 (x64) / Witte Software　·　本地计算，不联网</div>
+
+<div class="card">
+  <div class="row">
+    <label>注册名</label>
+    <input type="text" id="name" value="TESTSLAVE-2026" spellcheck="false">
+    <span class="hint">显示在 About 里</span>
+  </div>
+  <div class="row">
+    <label>WIT 编号</label>
+    <input type="number" id="wit" value="99" min="23" max="99">
+    <span class="hint">23–99；14–22 属旧版码会被拒</span>
+  </div>
+
+  <div class="btns">
+    <button class="primary" id="btnGen" onclick="DoGenerate">生成注册码</button>
+    <button id="btnCopy" onclick="DoCopy">复制</button>
+    <button class="ok" id="btnReg" onclick="DoRegister">写入本机并生效</button>
+    <button id="btnTest" onclick="DoSelfTest">自检</button>
+  </div>
+
+  <textarea id="out" readonly></textarea>
+  <div class="meta" id="meta"></div>
+  <div id="status"></div>
+</div>
+
+<script language="VBScript">
+Option Explicit
+
+Const PREFIX    = "mbslave"
+Const KEYSTREAM = "97280132"
+Const MARKER    = "# WIT"
+Const REGPATH   = "HKEY_CURRENT_USER\Software\Witte Software\mbslave\Register\"
+Const TRIALKEY  = "HKEY_CURRENT_USER\Software\Nogle\bbb1"
+Const KAT_NAME  = "TESTSLAVE-2026"
+Const KAT_KEY   = "54554154514756667C64666B7C7065771405020A063B10126E7E66010951"
+
+Dim gKey, gName, gWit
+
+Sub SetStatus(txt, cls)
+  Dim el
+  Set el = document.getElementById("status")
+  el.innerHTML = "<span class='" & cls & "'>" & txt & "</span>"
+End Sub
+
+Function ByteHex(b)
+  Dim h
+  h = Hex(b)
+  If Len(h) < 2 Then h = "0" & h
+  ByteHex = h
+End Function
+
+Function IsDigitCh(c)
+  If Len(c) <> 1 Then IsDigitCh = False : Exit Function
+  IsDigitCh = (c >= "0" And c <= "9")
+End Function
+
+' returns "" when ok, else an error message
+Function CheckInputs(nm, witNum)
+  Dim i, c, v
+  CheckInputs = ""
+  If Len(nm) < 4 Then
+    CheckInputs = "注册名至少 4 个字符"
+    Exit Function
+  End If
+  If Len(nm) > 40 Then
+    CheckInputs = "注册名不要超过 40 个字符"
+    Exit Function
+  End If
+  For i = 1 To Len(nm)
+    c = Mid(nm, i, 1)
+    v = AscW(c)
+    If v < 32 Or v > 126 Then
+      CheckInputs = "注册名只能用英文/数字/符号（可打印 ASCII），第 " & i & " 个字符不合法"
+      Exit Function
+    End If
+  Next
+  If InStr(UCase(nm), "WIT") > 0 Then
+    CheckInputs = "注册名里不能出现 WIT（程序会把它当版本标记解析）"
+    Exit Function
+  End If
+  If Not IsNumeric(witNum) Then
+    CheckInputs = "WIT 编号必须是数字"
+    Exit Function
+  End If
+  If witNum < 23 Or witNum > 99 Then
+    CheckInputs = "WIT 编号只能是 23–99（14–22 是旧版码，程序会拒绝）"
+    Exit Function
+  End If
+End Function
+
+' core: name + wit -> registration key (uppercase hex)
+Function MakeKey(nm, witNum)
+  Dim pt, i, b, c, chk, hx, wit2
+  wit2 = CStr(witNum)
+  If Len(wit2) < 2 Then wit2 = "0" & wit2
+  pt = PREFIX & nm & Chr(10) & MARKER & wit2
+
+  chk = 0
+  hx = ""
+  For i = 1 To Len(pt)
+    b = AscW(Mid(pt, i, 1))
+    chk = chk Xor b
+    c = b Xor AscW(Mid(KEYSTREAM, ((i - 1) Mod 8) + 1, 1))
+    hx = hx & ByteHex(c)
+  Next
+  MakeKey = hx & ByteHex(chk)
+End Function
+
+Function PlainOf(nm, witNum)
+  Dim wit2
+  wit2 = CStr(witNum)
+  If Len(wit2) < 2 Then wit2 = "0" & wit2
+  PlainOf = PREFIX & nm & Chr(10) & MARKER & wit2
+End Function
+
+Sub Render()
+  document.getElementById("out").value = gKey
+  document.getElementById("meta").innerText = _
+      "明文      : " & Replace(PlainOf(gName, gWit), Chr(10), "\n") & vbCrLf & _
+      "校验字节  : " & Right(gKey, 2) & "   密钥串: " & KEYSTREAM & "   位数: " & Len(gKey)
+End Sub
+
+Sub DoGenerate()
+  Dim nm, w, errMsg
+  nm = Trim(document.getElementById("name").value)
+  w = document.getElementById("wit").value
+  errMsg = CheckInputs(nm, w)
+  If errMsg <> "" Then
+    SetStatus errMsg, "err-t"
+    Exit Sub
+  End If
+  gName = nm : gWit = CLng(w) : gKey = MakeKey(gName, gWit)
+  Render
+  SetStatus "已生成，可直接「写入本机并生效」，然后重启 Modbus Slave。", "ok-t"
+End Sub
+
+Sub DoCopy()
+  If gKey = "" Then DoGenerate
+  If gKey = "" Then Exit Sub
+  window.clipboardData.setData "Text", gKey
+  SetStatus "注册码已复制到剪贴板。", "ok-t"
+End Sub
+
+Sub DoRegister()
+  Dim sh, ans, errMsg, nm, w
+  If gKey = "" Then
+    DoGenerate
+    If gKey = "" Then Exit Sub
+  End If
+  ans = MsgBox("将写入注册表并立即生效：" & vbCrLf & vbCrLf & _
+               "  注册名: " & gName & vbCrLf & _
+               "  注册码: " & gKey & vbCrLf & vbCrLf & _
+               "写入位置 HKCU\Software\Witte Software\mbslave\Register" & vbCrLf & _
+               "之后请重启 Modbus Slave（当前已开的窗口需关掉重开才刷新授权）。" & vbCrLf & vbCrLf & _
+               "继续？", vbYesNo + vbQuestion, "写入注册表")
+  If ans <> vbYes Then Exit Sub
+  On Error Resume Next
+  Set sh = CreateObject("WScript.Shell")
+  sh.RegWrite REGPATH & "Key", gKey, "REG_SZ"
+  sh.RegWrite REGPATH & "Name", gName, "REG_SZ"
+  If Err.Number <> 0 Then
+    SetStatus "写入失败（" & Err.Description & "），可试「复制」后手工粘贴到注册对话框。", "err-t"
+    Err.Clear
+    Exit Sub
+  End If
+  On Error GoTo 0
+  SetStatus "已写入。关闭并重新打开 Modbus Slave，About 里应显示 " & gName & "。", "ok-t"
+End Sub
+
+Sub DoSelfTest()
+  Dim k, i, okAll, detail
+  okAll = True
+  detail = ""
+  k = MakeKey(KAT_NAME, 99)
+  If k <> KAT_KEY Then
+    okAll = False
+    detail = detail & "KAT 失败: " & k & vbCrLf
+  End If
+  ' 负例：WIT=22 必须被输入校验挡住
+  If CheckInputs("ABCDEFGH", 22) = "" Then
+    okAll = False
+    detail = detail & "负例失败: WIT=22 未被拦截" & vbCrLf
+  End If
+  If CheckInputs("HASWITNAME", 99) = "" Then
+    okAll = False
+    detail = detail & "负例失败: 名字含 WIT 未被拦截" & vbCrLf
+  End If
+  If okAll Then
+    MsgBox "自检通过。" & vbCrLf & "KAT: " & KAT_NAME & " -> " & k, vbInformation, "自检"
+    SetStatus "自检通过（KAT + 2 个负例）。", "ok-t"
+  Else
+    MsgBox "自检失败：" & vbCrLf & detail, vbCritical, "自检"
+    SetStatus "自检失败。", "err-t"
+  End If
+End Sub
+
+Sub DoResetTrial()
+  Dim sh, ans
+  ans = MsgBox("删除 HKCU\Software\Nogle\bbb1 试用锚点，可恢复 30 天试用（当前注册不受影响）。继续？", _
+               vbYesNo + vbExclamation, "重置试用")
+  If ans <> vbYes Then Exit Sub
+  Set sh = CreateObject("WScript.Shell")
+  sh.RegDelete TRIALKEY & "\"
+  SetStatus "试用锚点已删除。", "ok-t"
+End Sub
+
+Sub Window_OnLoad
+  window.resizeTo 700, 470
+  window.moveTo 220, 160
+  DoGenerate
+End Sub
+</script>
+</body>
+</html>

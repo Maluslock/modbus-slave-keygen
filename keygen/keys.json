@@ -1,0 +1,42 @@
+[
+  {
+    "name": "TESTSLAVE-2026",
+    "key": "54554154514756667C64666B7C7065771405020A063B10126E7E66010951",
+    "plaintext": "mbslaveTESTSLAVE-2026\n# WIT99",
+    "wit_num": 99,
+    "retcode": 6,
+    "key_len": 60
+  },
+  {
+    "name": "liuyue-2026-11",
+    "key": "545541545147565E50424B4D551C01020B011F09013B10126E7E660A033F",
+    "plaintext": "mbslaveliuyue-2026-11\n# WIT23",
+    "wit_num": 23,
+    "retcode": 6,
+    "key_len": 60
+  },
+  {
+    "name": "Witte User Co",
+    "key": "54554154514756655043465D106440574B1771573A1213657063010965",
+    "plaintext": "mbslaveWitte User Co\n# WIT31",
+    "wit_num": 31,
+    "retcode": 6,
+    "key_len": 58
+  },
+  {
+    "name": "HUANAN-ZHIYE-01",
+    "key": "545541545147567A6C767C797E1C697A706E77150000391119607B6C04037C",
+    "plaintext": "mbslaveHUANAN-ZHIYE-01\n# WIT42",
+    "wit_num": 42,
+    "retcode": 6,
+    "key_len": 62
+  },
+  {
+    "name": "ModbusSlaveTest",
+    "key": "545541545147567F5653504D43625F534F52665D4345391119607B6C070678",
+    "plaintext": "mbslaveModbusSlaveTest\n# WIT77",
+    "wit_num": 77,
+    "retcode": 6,
+    "key_len": 62
+  }
+]
